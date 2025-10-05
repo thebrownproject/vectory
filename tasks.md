@@ -1,36 +1,36 @@
 # Vectory - Development Tasks
 
-## Project Status: Not Started
-**Current Phase**: Setup & Foundation
+## Project Status: Phase 1 Complete ✅
+**Current Phase**: Phase 2 - Vector DB Adapter
 
 ---
 
-## Phase 1: Project Setup & Configuration
+## Phase 1: Project Setup & Configuration ✅
 
-- [ ] **T1.1**: Initialize backend FastAPI project structure
+- [x] **T1.1**: Initialize backend FastAPI project structure
   - Create `backend/` directory
   - Set up `main.py`, `requirements.txt`
   - Create folder structure: `routers/`, `services/`, `adapters/`
 
-- [ ] **T1.2**: Initialize frontend Next.js project
+- [x] **T1.2**: Initialize frontend Next.js project
   - Create Next.js 15 app with TypeScript and Tailwind
   - Configure to run on localhost:3000
   - Set up basic page structure
 
-- [ ] **T1.3**: Configure environment variables
+- [x] **T1.3**: Configure environment variables
   - Create `backend/.env` with Pinecone and OpenAI keys
   - Create `frontend/.env.local` with API URL
   - Add `.env` files to `.gitignore`
 
-- [ ] **T1.4**: Install and verify backend dependencies
+- [x] **T1.4**: Install and verify backend dependencies
   - FastAPI, uvicorn, python-multipart
-  - PyPDF2 or pdfplumber
-  - LangChain (text splitting only)
+  - pypdf (replaced PyPDF2)
+  - LangChain text splitters
   - OpenAI SDK
   - Pinecone SDK
   - python-dotenv
 
-- [ ] **T1.5**: Configure CORS in FastAPI for local development
+- [x] **T1.5**: Configure CORS in FastAPI for local development
   - Allow localhost:3000 origin
   - Configure for multipart/form-data
 
