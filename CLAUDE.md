@@ -133,3 +133,42 @@ Current development follows this sequence:
 - Document management (delete, update operations)
 - OCR for scanned PDFs
 - Deployment configuration
+
+## Git Workflow
+
+**Repository**: https://github.com/thebrownproject/vectory
+
+**Branching Strategy**: Branch per development phase
+
+Create feature branches for each phase in `tasks.md`:
+- `feature/phase-1-setup`
+- `feature/phase-2-vector-adapter`
+- `feature/phase-3-pdf-processing`
+- `feature/phase-4-embeddings`
+- `feature/phase-5-upload-endpoint`
+- `feature/phase-6-frontend`
+- `feature/phase-7-error-handling`
+- `feature/phase-8-testing`
+- `feature/phase-9-documentation`
+
+**Workflow**:
+1. Check `tasks.md` to identify current phase
+2. Create branch: `git checkout -b feature/phase-X-name`
+3. Complete all tasks within the phase
+4. Test the phase functionality
+5. Commit with descriptive messages
+6. Merge to `main`: `git checkout main && git merge feature/phase-X-name`
+7. Push: `git push origin main`
+8. Move to next phase
+
+**Commit Message Format**:
+```
+Brief description of changes
+
+- Bullet point details of what changed
+- Reference task IDs when applicable (e.g., "Completed T1.1-T1.5")
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
