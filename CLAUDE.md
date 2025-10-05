@@ -154,12 +154,17 @@ Create feature branches for each phase in `tasks.md`:
 **Workflow**:
 1. Check `tasks.md` to identify current phase
 2. Create branch: `git checkout -b feature/phase-X-name`
-3. Complete all tasks within the phase
-4. Test the phase functionality
-5. Commit with descriptive messages
-6. Merge to `main`: `git checkout main && git merge feature/phase-X-name`
-7. Push: `git push origin main`
-8. Move to next phase
+3. Complete a single task (e.g., T1.1)
+4. Commit immediately: `git add . && git commit -m "Complete T1.1: [description]"`
+5. Move to next task in the phase
+6. Repeat steps 3-5 until all tasks in phase are complete
+7. Test the entire phase functionality
+8. Push branch: `git push -u origin feature/phase-X-name`
+9. Merge to `main`: `git checkout main && git merge feature/phase-X-name`
+10. Push: `git push origin main`
+11. Move to next phase
+
+**Important**: Commit after EACH task completion, not at the end of the phase. This creates granular history and easy rollback points.
 
 **Commit Message Format**:
 ```
