@@ -1,0 +1,75 @@
+# Development Notes
+
+A running diary of development decisions, important context, and session-to-session notes.
+
+---
+
+## Session 1 - October 5, 2025
+
+### Phase 1: Setup & Configuration ✅
+
+**What was completed:**
+- Backend FastAPI structure with CORS configured
+- Frontend Next.js 15 with TypeScript and Tailwind CSS
+- Environment variables configured (templates created)
+- All dependencies installed with latest 2025 versions
+- VS Code Python interpreter configured
+
+**Important Decisions Made:**
+
+1. **Package Updates:**
+   - Replaced `PyPDF2` with `pypdf==6.1.1` (PyPDF2 is deprecated, pypdf is the maintained successor)
+   - Replaced `pinecone-client` with `pinecone==7.3.0` (package was renamed in v5.1.0)
+   - Using `langchain-text-splitters` only (not full LangChain) to keep dependencies minimal
+
+2. **Version Strategy:**
+   - All packages verified against PyPI for latest stable versions as of Oct 2025
+   - FastAPI 0.118.0, OpenAI 2.1.0, Pinecone 7.3.0, pypdf 6.1.1, langchain-text-splitters 0.3.11
+
+3. **Git Workflow:**
+   - Using branch-per-phase strategy (feature/phase-X-name)
+   - Direct merges to main (no PRs for solo development)
+   - Commit after each task completion for granular history
+
+4. **Development Environment:**
+   - Python virtual environment: `backend/venv/`
+   - VS Code settings configured to use venv interpreter
+   - Both dev servers running: frontend (port 3000), backend (port 8000)
+
+**FastAPI Auto-Features:**
+- Swagger UI available at: `http://localhost:8000/docs`
+- ReDoc available at: `http://localhost:8000/redoc`
+- No additional configuration needed
+
+**API Keys Status:**
+- `.env` files created with placeholders
+- ⚠️ **TODO**: Need actual API keys before Phase 3 (Embeddings) and Phase 5 (Upload Endpoint)
+  - `OPENAI_API_KEY` - for text-embedding-3-small model
+  - `PINECONE_API_KEY` - for vector storage
+  - `PINECONE_INDEX_NAME` - create index "vectory" in Pinecone dashboard (1536 dimensions)
+
+**Current Branch:** `feature/phase-2-vector-adapter`
+
+**Next Steps:** Phase 2 - Vector DB Adapter (T2.1, T2.2, T2.3)
+
+---
+
+## Session Notes Template (for future sessions)
+
+### Session X - [Date]
+
+**Phase:** [Phase Name]
+
+**What was completed:**
+- Task list
+
+**Important Decisions Made:**
+- Decision 1
+- Decision 2
+
+**Blockers/Issues:**
+- Any problems encountered
+
+**Current Branch:** [branch name]
+
+**Next Steps:** [What to tackle next]

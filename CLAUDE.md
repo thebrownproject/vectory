@@ -105,6 +105,13 @@ Each vector in Pinecone includes:
 
 **Always check `tasks.md` when starting work.** It contains the complete development roadmap broken into phases. Mark tasks complete with `[x]` as you finish them.
 
+**Always check `DEVELOPMENT_NOTES.md` for session context.** This file contains:
+- Important decisions made in previous sessions
+- Package choices and version rationale
+- Current development environment state
+- Blockers, issues, and TODOs
+- Session-to-session continuity notes
+
 Current development follows this sequence:
 1. Setup & Configuration
 2. Vector DB Adapter (abstraction layer)
@@ -172,8 +179,4 @@ Brief description of changes
 
 - Bullet point details of what changed
 - Reference task IDs when applicable (e.g., "Completed T1.1-T1.5")
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
