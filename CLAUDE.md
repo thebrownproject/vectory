@@ -105,7 +105,7 @@ Each vector in Pinecone includes:
 
 **Always check `tasks.md` when starting work.** It contains the complete development roadmap broken into phases. Mark tasks complete with `[x]` as you finish them.
 
-**Always check `DEVELOPMENT_NOTES.md` for session context.** This file contains:
+**Always check `development-notes.md` for session context.** This file contains:
 - Important decisions made in previous sessions
 - Package choices and version rationale
 - Current development environment state
