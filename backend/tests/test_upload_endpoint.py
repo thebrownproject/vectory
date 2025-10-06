@@ -17,7 +17,7 @@ import os
 
 # Configuration
 API_URL = "http://localhost:8000/api/upload"
-TEST_PDF_PATH = "test_data/Building_Surveyors_Referral_Response_Report.pdf"
+TEST_PDF_PATH = "/Users/fraserbrown/Library/CloudStorage/OneDrive-Personal/Desktop/11 Empress Ave, Kingville - 2025.09.23 - BS prelim package/Soil Report/Soil Report - 250046.pdf"
 
 def test_upload():
     """Test PDF upload endpoint"""
