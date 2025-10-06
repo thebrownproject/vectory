@@ -3,6 +3,11 @@
 Test script for EmbeddingService
 Tests both single and batch embedding generation
 """
+import sys
+from pathlib import Path
+
+# Add parent directory to path so we can import from backend
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
 from services.embeddings import EmbeddingService
