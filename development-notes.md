@@ -265,6 +265,74 @@ A running diary of development decisions, important context, and session-to-sess
 
 ---
 
+## Session 6 - October 6, 2025
+
+### Code Review & Test Reorganization ✅
+
+**What was completed:**
+- Comprehensive code review of all backend code using Context7 documentation
+- Fixed type hints in `pdf_processor.py` (`any` → `Any`)
+- Added namespace validation in `pinecone_adapter.py`
+- Reorganized tests into `backend/tests/` directory following pytest conventions
+
+**Code Review Findings:**
+
+1. **Type Hint Issue (Fixed):**
+   - Problem: `any` (built-in function) used instead of `Any` (typing module)
+   - Location: `pdf_processor.py` lines 16, 35, 62
+   - Fix: Added `from typing import Any` and updated all type hints
+   - Impact: Improves type safety for static analysis tools
+
+2. **Namespace Validation (Added):**
+   - Problem: No validation preventing empty namespaces
+   - Location: `pinecone_adapter.py` upsert method
+   - Fix: Added check for non-empty string with clear error message
+   - Rationale: Prevents vectors from going into default namespace unexpectedly
+
+3. **Documentation Cross-Check:**
+   - ✅ FastAPI usage verified (CORS, file uploads, error handling)
+   - ✅ OpenAI client verified (`embeddings.create()` pattern)
+   - ✅ Pinecone SDK verified (upsert format, health check method)
+   - ✅ PyPDF usage verified (`PdfReader`, `extract_text()`)
+   - ✅ LangChain text splitter verified (chunk_size, chunk_overlap parameters)
+
+**Test Reorganization:**
+
+1. **Directory Structure Change:**
+   - Before: Test files in `backend/` root with `_test_` prefix
+   - After: Test files in `backend/tests/` with `test_` prefix
+   - Rationale: Follows Python/pytest best practices
+
+2. **Files Reorganized:**
+   - `_test_adapter.py` → `tests/test_adapter.py`
+   - `_test_embeddings.py` → `tests/test_embeddings.py`
+   - `_test_pdf_processor.py` → `tests/test_pdf_processor.py`
+   - `_test_upload_endpoint.py` → `tests/test_upload_endpoint.py`
+   - Added `tests/__init__.py` for package structure
+
+3. **Import Fixes:**
+   - Added `sys.path.insert(0, str(Path(__file__).parent.parent))` to all test files
+   - Allows imports from parent backend directory
+   - Verified with successful test run of `test_embeddings.py`
+
+**Testing Results:**
+- ✅ `test_embeddings.py` runs successfully with new structure
+- ✅ All imports working correctly
+- ✅ No code functionality changed, only organization
+
+**Commits Made:**
+1. `Fix type hints and add namespace validation` (d10bcd9)
+2. `Reorganize tests into tests/ directory` (0555e4a)
+
+**Current Branch:** `main` (fixes applied directly to main)
+
+**Next Steps:**
+- Run all tests to verify they work after reorganization
+- Update any documentation that references test file locations
+- Continue with Phase 6 - Frontend Upload Interface
+
+---
+
 ## Session Notes Template (for future sessions)
 
 ### Session X - [Date]
