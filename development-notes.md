@@ -54,6 +54,45 @@ A running diary of development decisions, important context, and session-to-sess
 
 ---
 
+## Session 2 - October 6, 2025
+
+### Phase 2: Vector DB Adapter ✅
+
+**What was completed:**
+- T2.1: Base vector DB adapter interface (`backend/adapters/base_adapter.py`)
+- T2.2: Pinecone adapter implementation (`backend/adapters/pinecone_adapter.py`)
+- T2.3: Health check endpoint integration and testing
+
+**Important Decisions Made:**
+
+1. **Adapter Pattern Implementation:**
+   - Abstract base class `VectorDBAdapter` with two methods: `upsert()` and `health_check()`
+   - Type hints for all parameters (vectors, metadata, namespace, ids)
+   - Return dictionary from `upsert()` to allow different adapters to return relevant stats
+   - Health check returns boolean for simple status checking
+
+2. **Pinecone-Specific Design:**
+   - Adapter reads `PINECONE_API_KEY` and `PINECONE_INDEX_NAME` from environment
+   - Uses Pinecone SDK v7.3.0 (modern API, no ServerlessSpec import needed for basic operations)
+   - Upserts use namespace parameter for document organization
+   - Health check uses `describe_index_stats()` to verify connection
+
+3. **Testing Approach:**
+   - Health check endpoint at `/api/health` returns Pinecone connection status
+   - Created `test_adapter.py` script for manual testing (expects valid API key)
+   - Confirmed adapter properly handles missing API keys with clear error messages
+
+**Testing Results:**
+- Health endpoint working: `{"status": "ok", "pinecone_connected": false, "error": "..."}`
+- Adapter initialization validates environment variables correctly
+- Test script confirms Pinecone API communication (401 error expected without valid key)
+
+**Current Branch:** `feature/phase-2-vector-adapter`
+
+**Next Steps:** Phase 3 - PDF Processing (T3.1, T3.2, T3.3)
+
+---
+
 ## Session Notes Template (for future sessions)
 
 ### Session X - [Date]

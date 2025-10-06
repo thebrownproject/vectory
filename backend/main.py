@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from adapters import PineconeAdapter
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="Vectory API", version="0.1.0")
 
@@ -17,4 +21,9 @@ def root():
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "pinecone_connected": False}
+    try:
+        adapter = PineconeAdapter()
+        pinecone_status = adapter.health_check()
+        return {"status": "ok", "pinecone_connected": pinecone_status}
+    except Exception as e:
+        return {"status": "ok", "pinecone_connected": False, "error": str(e)}

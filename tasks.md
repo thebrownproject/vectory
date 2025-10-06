@@ -38,18 +38,18 @@
 
 ## Phase 2: Backend Core - Vector DB Adapter (FR3.1, FR3.2, FR3.3)
 
-- [ ] **T2.1**: Create base vector DB adapter interface
+- [x] **T2.1**: Create base vector DB adapter interface
   - File: `backend/adapters/base_adapter.py`
   - Abstract methods: `upsert()`, `health_check()`
   - Define method signatures with type hints
 
-- [ ] **T2.2**: Implement Pinecone adapter
+- [x] **T2.2**: Implement Pinecone adapter
   - File: `backend/adapters/pinecone_adapter.py`
   - Implement `upsert()` with namespace support
   - Implement `health_check()` to verify connection
   - Handle Pinecone-specific errors
 
-- [ ] **T2.3**: Test Pinecone connection
+- [x] **T2.3**: Test Pinecone connection
   - Create simple health check endpoint
   - Verify Pinecone index exists and is accessible
   - Test upsert with sample vector
