@@ -151,6 +151,47 @@ A running diary of development decisions, important context, and session-to-sess
 
 ---
 
+## Session 4 - October 6, 2025
+
+### Phase 4: Embeddings ✅
+
+**What was completed:**
+- T4.1: OpenAI embeddings service (`backend/services/embeddings.py`)
+- T4.2: Test script with comprehensive validation
+
+**Important Decisions Made:**
+
+1. **Context7 Documentation Lookup:**
+   - Used Context7 MCP to fetch latest OpenAI Cookbook examples
+   - Confirmed modern API pattern: `client.embeddings.create()`
+   - Learned batch processing best practices (up to 2048 inputs, cookbook recommends 1000)
+
+2. **Service Implementation:**
+   - Class-based `EmbeddingService` with OpenAI client initialization
+   - Environment variable validation on instantiation
+   - Two methods: `generate_embedding()` for single, `generate_embeddings()` for batch
+   - Response parsing: `[item.embedding for item in response.data]`
+   - Empty input handling (returns empty list)
+
+3. **API Details:**
+   - Model: `text-embedding-3-small`
+   - Dimensions: 1536 (verified in tests)
+   - Error handling wraps OpenAI exceptions with descriptive messages
+
+**Testing Results:**
+- ✅ Single embedding: 1536 dimensions confirmed
+- ✅ Batch embeddings: 3 texts → 3 embeddings, all correct dimensions
+- ✅ Empty input: Returns empty list without API call
+- ✅ All tests use real OpenAI API (not mocked)
+
+**Phase Status:** ✅ Complete - Ready to merge to main
+
+**Current Branch:** `feature/phase-4-embeddings`
+
+**Next Steps:** Phase 5 - Upload Endpoint (T5.1, T5.2, T5.3, T5.4)
+
+---
+
 ## Session Notes Template (for future sessions)
 
 ### Session X - [Date]

@@ -1,7 +1,7 @@
 # Vectory - Development Tasks
 
-## Project Status: Phase 3 Complete ✅
-**Current Phase**: Phase 4 - Embeddings
+## Project Status: Phase 4 Complete ✅
+**Current Phase**: Phase 5 - Upload Endpoint
 
 ---
 
@@ -76,15 +76,15 @@
 
 ---
 
-## Phase 4: Backend Core - Embeddings (FR2.3)
+## Phase 4: Backend Core - Embeddings (FR2.3) ✅
 
-- [ ] **T4.1**: Implement OpenAI embeddings service
+- [x] **T4.1**: Implement OpenAI embeddings service
   - File: `backend/services/embeddings.py`
   - Generate embeddings using text-embedding-3-small
   - Handle OpenAI API errors
   - Return vectors with correct dimensions (1536)
 
-- [ ] **T4.2**: Test embedding generation
+- [x] **T4.2**: Test embedding generation
   - Test with sample text chunks
   - Verify vector dimensions
   - Check API response handling
@@ -209,4 +209,4 @@
 ---
 
 ## Current Task
-**Next up**: T4.1 - Implement OpenAI embeddings service
+**Next up**: T5.1 - Create upload router
