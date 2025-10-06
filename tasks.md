@@ -1,7 +1,7 @@
 # Vectory - Development Tasks
 
-## Project Status: Phase 2 Complete ✅
-**Current Phase**: Phase 3 - PDF Processing
+## Project Status: Phase 3 Complete ✅
+**Current Phase**: Phase 4 - Embeddings
 
 ---
 
@@ -56,20 +56,20 @@
 
 ---
 
-## Phase 3: Backend Core - PDF Processing (FR2.1, FR2.2)
+## Phase 3: Backend Core - PDF Processing (FR2.1, FR2.2) ✅
 
-- [ ] **T3.1**: Implement PDF text extraction service
+- [x] **T3.1**: Implement PDF text extraction service
   - File: `backend/services/pdf_processor.py`
   - Extract text from uploaded PDF
   - Track page numbers during extraction
   - Handle extraction errors gracefully
 
-- [ ] **T3.2**: Implement text chunking service
+- [x] **T3.2**: Implement text chunking service
   - Use LangChain's RecursiveCharacterTextSplitter
   - Configure: 1000 chars, 200 char overlap
   - Return chunks with metadata (page number, chunk index)
 
-- [ ] **T3.3**: Test PDF processing with sample documents
+- [x] **T3.3**: Test PDF processing with sample documents
   - Test with multi-page PDF
   - Verify page number tracking
   - Verify chunk count accuracy
@@ -209,4 +209,4 @@
 ---
 
 ## Current Task
-**Next up**: T1.1 - Initialize backend FastAPI project structure
+**Next up**: T4.1 - Implement OpenAI embeddings service

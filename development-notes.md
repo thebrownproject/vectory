@@ -101,6 +101,56 @@ A running diary of development decisions, important context, and session-to-sess
 
 ---
 
+## Session 3 - October 6, 2025
+
+### Phase 3: PDF Processing ✅
+
+**What was completed:**
+- T3.1: PDF text extraction service (`backend/services/pdf_processor.py`)
+- T3.2: Text chunking implementation with LangChain RecursiveCharacterTextSplitter
+- T3.3: Test script created and verified with real PDF
+
+**Important Decisions Made:**
+
+1. **Single-class design for PDF processing:**
+   - Combined extraction and chunking in `PDFProcessor` class
+   - Two-step process: `extract_text_with_pages()` → `chunk_text()`
+   - Convenience method `process_pdf()` for single-call processing
+   - Rationale: Extraction and chunking are tightly coupled, always used together
+
+2. **Metadata structure:**
+   - Each chunk includes: `page_number`, `chunk_index`, `text`
+   - Global `chunk_index` across entire document (not per-page)
+   - Empty pages filtered out during extraction
+   - This structure maps directly to Pinecone metadata needs
+
+3. **LangChain configuration:**
+   - Import: `from langchain_text_splitters import RecursiveCharacterTextSplitter`
+   - Chunk size: 1000 characters
+   - Overlap: 200 characters
+   - Default separators: `["\n\n", "\n", " ", ""]`
+
+4. **Testing approach:**
+   - Created `_test_pdf_processor.py` following existing pattern
+   - Tested with real 7-page soil report PDF
+   - Results: 7 pages → 14 chunks (avg 2 chunks/page)
+   - Test only processes to memory, no Pinecone upload
+
+**Testing Results:**
+- ✅ Successfully extracted text from 7-page PDF
+- ✅ Created 14 chunks with proper metadata
+- ✅ Chunk size correctly limited to ~1000 characters
+- ✅ Page numbers tracked accurately
+- ✅ Combined `process_pdf()` method works end-to-end
+
+**Phase Status:** ✅ Complete - Ready to merge to main
+
+**Current Branch:** `feature/phase-3-pdf-processing`
+
+**Next Steps:** Phase 4 - Embeddings (T4.1, T4.2)
+
+---
+
 ## Session Notes Template (for future sessions)
 
 ### Session X - [Date]
