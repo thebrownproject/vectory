@@ -63,7 +63,29 @@ Ready to proceed with [Next Task ID]?
 
 After presenting the summary, ask: "Would you like to proceed with [Next Task ID]?"
 
-If user confirms, begin working on the next task following the workflow in CLAUDE.md.
+Do NOT proceed until the user confirms.
+
+## Step 7: Fetch Documentation with Context7 MCP (After User Confirms)
+
+**IMPORTANT:** Only execute this step AFTER the user has confirmed they want to proceed.
+
+Before writing any code for the next task:
+1. Identify which libraries/packages the next task will use (based on task description in tasks.md)
+2. Use Context7 MCP to fetch up-to-date documentation for each library
+3. Focus the documentation query on the specific functionality needed for the task
+
+**Example for different tasks:**
+- **Embeddings task**: Fetch OpenAI Python SDK docs (topic: "text embeddings generation")
+- **FastAPI endpoint task**: Fetch FastAPI docs (topic: "file upload multipart forms")
+- **React component task**: Fetch React/Next.js docs (topic: "file upload components")
+
+**Process:**
+1. Use `mcp__context7__resolve-library-id` to find the library
+2. Use `mcp__context7__get-library-docs` with specific topic and ~3000 tokens
+3. Review the documentation before writing any code
+4. Apply best practices from the docs to write concise, clean code
+
+Then begin working on the task following the workflow in CLAUDE.md.
 
 ## Additional Checks
 
