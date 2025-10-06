@@ -4,7 +4,6 @@ Test script for EmbeddingService
 Tests both single and batch embedding generation
 """
 
-import os
 from dotenv import load_dotenv
 from services.embeddings import EmbeddingService
 
