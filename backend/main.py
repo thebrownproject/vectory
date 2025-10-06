@@ -2,10 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from adapters import PineconeAdapter
 from dotenv import load_dotenv
+from routers import upload
 
 load_dotenv()
 
 app = FastAPI(title="Vectory API", version="0.1.0")
+
+# Include routers
+app.include_router(upload.router)
 
 app.add_middleware(
     CORSMiddleware,
