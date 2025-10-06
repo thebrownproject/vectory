@@ -1,7 +1,7 @@
 # Vectory - Development Tasks
 
-## Project Status: Phase 4 Complete ✅
-**Current Phase**: Phase 5 - Upload Endpoint
+## Project Status: Phase 5 Complete ✅
+**Current Phase**: Phase 6 - Frontend Upload Interface
 
 ---
 
@@ -91,26 +91,26 @@
 
 ---
 
-## Phase 5: Backend Core - Upload Endpoint (FR2.4, FR3.1, FR3.4)
+## Phase 5: Backend Core - Upload Endpoint (FR2.4, FR3.1, FR3.4) ✅
 
-- [ ] **T5.1**: Create upload router
+- [x] **T5.1**: Create upload router
   - File: `backend/routers/upload.py`
   - POST /api/upload endpoint
   - Accept multipart/form-data (PDF files)
   - Validate file type (.pdf only)
 
-- [ ] **T5.2**: Implement complete processing pipeline
+- [x] **T5.2**: Implement complete processing pipeline
   - Extract text from PDF
   - Chunk text
   - Generate embeddings for each chunk
   - Create metadata (filename, page, chunk index, timestamp)
   - Upsert to Pinecone with namespace
 
-- [ ] **T5.3**: Return processing results
+- [x] **T5.3**: Return processing results
   - Return JSON with: filename, chunks_created, vectors_stored, namespace
   - Handle and return errors appropriately (400, 422, 503)
 
-- [ ] **T5.4**: Create health check endpoint
+- [x] **T5.4**: Create health check endpoint
   - GET /api/health
   - Return Pinecone connection status
 
@@ -209,4 +209,4 @@
 ---
 
 ## Current Task
-**Next up**: T5.1 - Create upload router
+**Next up**: T6.1 - Create file upload component
