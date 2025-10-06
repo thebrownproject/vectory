@@ -26,6 +26,10 @@ class PineconeAdapter(VectorDBAdapter):
     ) -> Dict[str, Any]:
         """Upsert vectors to Pinecone"""
 
+        # Validate namespace
+        if not namespace or not namespace.strip():
+            raise ValueError("namespace must be a non-empty string")
+
         # Prepare vectors in Pinecone format: (id, values, metadata)
         pinecone_vectors = [
             {

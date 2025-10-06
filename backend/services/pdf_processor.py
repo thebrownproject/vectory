@@ -1,6 +1,6 @@
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from typing import List, Dict
+from typing import List, Dict, Any
 
 
 class PDFProcessor:
@@ -13,7 +13,7 @@ class PDFProcessor:
             length_function=len,
         )
 
-    def extract_text_with_pages(self, pdf_path: str) -> List[Dict[str, any]]:
+    def extract_text_with_pages(self, pdf_path: str) -> List[Dict[str, Any]]:
         """
         Extract text from PDF, preserving page numbers.
 
@@ -32,7 +32,7 @@ class PDFProcessor:
 
         return pages_data
 
-    def chunk_text(self, pages_data: List[Dict[str, any]]) -> List[Dict[str, any]]:
+    def chunk_text(self, pages_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
         Chunk text from pages, preserving metadata.
 
@@ -59,7 +59,7 @@ class PDFProcessor:
 
         return chunks_with_metadata
 
-    def process_pdf(self, pdf_path: str) -> List[Dict[str, any]]:
+    def process_pdf(self, pdf_path: str) -> List[Dict[str, Any]]:
         """
         Complete pipeline: extract text and chunk it.
 
