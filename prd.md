@@ -124,6 +124,11 @@ vectory/
 │   ├── adapters/
 │   │   ├── pinecone_adapter.py  # Pinecone implementation
 │   │   └── base_adapter.py      # Abstract base class
+│   ├── tests/                # Test scripts
+│   │   ├── test_adapter.py       # Pinecone adapter tests
+│   │   ├── test_embeddings.py    # Embeddings service tests
+│   │   ├── test_pdf_processor.py # PDF processing tests
+│   │   └── test_upload_endpoint.py # Upload endpoint tests
 │   ├── requirements.txt
 │   └── .env                  # API keys
 │

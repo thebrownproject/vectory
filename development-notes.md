@@ -333,6 +333,59 @@ A running diary of development decisions, important context, and session-to-sess
 
 ---
 
+## Session 7 - October 7, 2025
+
+### Phase 6: Frontend - FileUpload Component (T6.1) ✅
+
+**What was completed:**
+- T6.1: Created `FileUpload.tsx` component with drag-and-drop functionality
+- Integrated react-dropzone library
+- Set up shadcn/ui configuration (dependencies installed, directories created)
+- Component tested and working in `page.tsx`
+
+**Important Decisions Made:**
+
+1. **Single component approach:**
+   - Kept FileUpload as one component (dropzone + file list together)
+   - Rationale: State is tightly coupled, matches POC simplicity goal
+   - ~100 lines total, easy to understand
+
+2. **File accumulation pattern:**
+   - Files accumulate across multiple selections (not replaced)
+   - Used functional setState (`prev =>`) to avoid stale closure bugs
+   - Users can build batches from different folders
+
+3. **react-dropzone configuration:**
+   - PDF validation: `accept: { 'application/pdf': ['.pdf'] }`
+   - Multiple file support enabled by default
+   - Integrated with useState for file management
+
+4. **shadcn/ui setup:**
+   - Dependencies: `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`
+   - Style: "new-york" (cleaner, modern)
+   - Created `components/`, `components/ui/`, `lib/` directories
+   - Note: `lib/utils.ts` not created yet (will add if needed for cn() helper)
+
+**Bug Fixes:**
+
+1. **Drag-and-drop not working:**
+   - Issue: className prop after `{...getRootProps()}` overwrote event handlers
+   - Fix: Pass className into getRootProps: `{...getRootProps({ className: ... })}`
+   - Lesson: Always pass custom props INTO getRootProps, not after spreading
+
+2. **Accessibility warning:**
+   - Added `aria-label` to remove buttons for screen reader support
+   - Format: `aria-label={Remove ${file.name}}`
+
+**Current Branch:** `feature/phase-6-frontend`
+
+**Next Steps:**
+- T6.2: Create StatusDisplay component (show upload progress/results)
+- T6.3: Integrate both components in page.tsx with proper layout
+- T6.4: Implement actual upload logic to FastAPI backend
+
+---
+
 ## Session Notes Template (for future sessions)
 
 ### Session X - [Date]

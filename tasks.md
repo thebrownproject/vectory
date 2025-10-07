@@ -118,7 +118,7 @@
 
 ## Phase 6: Frontend - Upload Interface (FR1.1, FR1.2, FR1.3, FR1.4)
 
-- [ ] **T6.1**: Create file upload component
+- [x] **T6.1**: Create file upload component
   - File: `frontend/components/FileUpload.tsx`
   - Drag-and-drop zone (accept .pdf only)
   - Support single and multiple file selection
