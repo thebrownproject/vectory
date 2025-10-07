@@ -1,32 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, X, FileText } from "lucide-react";
 
 interface FileUploadProps {
-  onFilesSelected: (files: File[]) => void;
+  files: File[];
+  onFilesChange: (files: File[]) => void;
   disabled?: boolean;
 }
 
 export default function FileUpload({
-  onFilesSelected,
+  files,
+  onFilesChange,
   disabled = false,
 }: FileUploadProps) {
-  // Component logic will go here
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
-  // Dropzone
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
       "application/pdf": [".pdf"],
     },
     onDrop: (acceptedFiles) => {
-      setSelectedFiles((prev) => {
-        const newFiles = [...prev, ...acceptedFiles];
-        onFilesSelected(newFiles);
-        return newFiles;
-      });
+      const newFiles = [...files, ...acceptedFiles];
+      onFilesChange(newFiles);
     },
     disabled,
   });
@@ -60,15 +55,15 @@ export default function FileUpload({
       </div>
 
       {/* Selected files list */}
-      {selectedFiles.length > 0 && (
+      {files.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-gray-700">
-            Selected Files ({selectedFiles.length})
+            Selected Files ({files.length})
           </h4>
-          {selectedFiles.map((file, index) => (
+          {files.map((file, index) => (
             <div
-              key={file.name + index}
-              className="flex items-center justify-between p-3 bg-gray-50 
+              key={`${file.name}-${index}`}
+              className="flex items-center justify-between p-3 bg-gray-50
   rounded-lg border border-gray-200"
             >
               <div className="flex items-center space-x-3">
@@ -84,7 +79,7 @@ export default function FileUpload({
               </div>
               <button
                 onClick={() => {
-                  setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
+                  onFilesChange(files.filter((_, i) => i !== index));
                 }}
                 className="text-gray-400 hover:text-red-500 transition-colors"
                 type="button"

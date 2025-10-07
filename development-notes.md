@@ -386,6 +386,94 @@ A running diary of development decisions, important context, and session-to-sess
 
 ---
 
+## Session 8 - October 8, 2025
+
+### Phase 6: Frontend - Complete Upload Interface (T6.2, T6.3, T6.4) ✅
+
+**What was completed:**
+- T6.2: Created `StatusDisplay.tsx` with discriminated union pattern for type-safe state management
+- T6.3: Built complete `page.tsx` integrating FileUpload and StatusDisplay
+- T6.4: Implemented upload logic in `lib/api.ts` service layer
+- Refactored FileUpload to controlled component pattern (eliminated duplicate state)
+- Tested end-to-end pipeline: Frontend → FastAPI → OpenAI → Pinecone
+
+**Important Decisions Made:**
+
+1. **Clean Architecture Refactor:**
+   - Created `lib/api.ts` to separate business logic from UI components
+   - Exported `UploadStatus` type from StatusDisplay (DRY principle - single source of truth)
+   - Reduced page.tsx from 118 lines to 80 lines (composition only)
+   - Rationale: Separation of concerns, testability, maintainability
+
+2. **Controlled Component Pattern:**
+   - Refactored FileUpload from uncontrolled (internal state) to controlled (props-driven)
+   - Props: `files: File[]` and `onFilesChange: (files: File[]) => void`
+   - Eliminated duplicate state between FileUpload and page.tsx
+   - Rationale: Single source of truth prevents sync bugs, allows parent to manage lifecycle
+
+3. **Discriminated Union for Status:**
+   - Used TypeScript discriminated unions for `UploadStatus` type
+   - Four states: `idle | uploading | success | error`
+   - Prevents impossible states (e.g., can't have error message with success results)
+   - Enables exhaustive type checking in StatusDisplay component
+
+4. **API Service Design:**
+   - Created `uploadPDFs()` function in `lib/api.ts`
+   - Handles FormData creation, fetch logic, error handling
+   - Returns typed `UploadResult[]` array
+   - Pure function - easily testable without React
+
+**Code Quality Improvements:**
+
+1. **Fixed duplicate type definitions:**
+   - Before: UploadStatus defined in both StatusDisplay and page.tsx
+   - After: Defined once in StatusDisplay, exported and imported
+
+2. **Fixed state synchronization bug:**
+   - Before: FileUpload had internal `selectedFiles` state + page.tsx had `files` state
+   - After: Single state in page.tsx, passed as props to FileUpload
+   - Result: Remove file button now works correctly, upload uses correct file list
+
+3. **Added missing button type:**
+   - Added `type="button"` to upload button to fix linting warning
+
+**Testing Results:**
+- ✅ Drag-and-drop file upload working
+- ✅ Multiple file selection working
+- ✅ Remove file button updates correctly
+- ✅ Upload to FastAPI successful (25 chunks → 25 vectors example)
+- ✅ Status display shows loading → success states
+- ✅ Files clear after successful upload
+- ✅ Zero linting errors across all files
+
+**Architecture Summary:**
+
+```
+frontend/
+├── app/
+│   └── page.tsx              # 80 lines - composition + state management
+├── components/
+│   ├── FileUpload.tsx        # Controlled component - no internal state
+│   └── StatusDisplay.tsx     # Exports UploadStatus type
+└── lib/
+    └── api.ts               # uploadPDFs() - all fetch logic isolated
+```
+
+**Known Issue:**
+- Encrypted PDFs fail with "cryptography>=3.1 is required for AES algorithm"
+- Not addressed this session - will add cryptography package in future if needed
+
+**Phase Status:** ✅ Complete - All T6.1-T6.4 tasks finished and tested
+
+**Current Branch:** `feature/phase-6-frontend`
+
+**Next Steps:**
+- Merge Phase 6 to main
+- Phase 7: Error Handling & User Feedback (most already implemented)
+- Consider adding cryptography package for encrypted PDF support
+
+---
+
 ## Session Notes Template (for future sessions)
 
 ### Session X - [Date]

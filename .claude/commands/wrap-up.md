@@ -4,8 +4,7 @@ You are wrapping up the current development session before ending the chat. Foll
 
 1. Read `tasks.md` to identify which tasks were completed in this session
 2. Mark completed tasks with `[x]` instead of `[ ]`
-3. Update any task notes or subtasks if needed
-4. Identify the current phase and next pending task
+3. Identify the current phase and next pending task
 
 ## Step 2: Add Session Notes to development-notes.md
 
@@ -33,9 +32,6 @@ Keep notes concise but informative - focus on decisions and context that future 
 - Another change
 - Additional context if needed
 
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 4. Commit with the message
@@ -44,6 +40,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ## Step 4: Provide Summary
 
 Give the user a brief summary:
+
 - What was completed this session
 - What files were created/modified
 - The commit hash
