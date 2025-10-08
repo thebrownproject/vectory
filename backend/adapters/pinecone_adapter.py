@@ -26,21 +26,23 @@ class PineconeAdapter(VectorDBAdapter):
     ) -> Dict[str, Any]:
         """Upsert vectors to Pinecone"""
 
-        # Validate namespace
+        # Validate namespace - prevents accidental writes to default namespace
+        # Each upload should have its own namespace (e.g., "document.pdf-uuid")
         if not namespace or not namespace.strip():
             raise ValueError("namespace must be a non-empty string")
 
-        # Prepare vectors in Pinecone format: (id, values, metadata)
+        # Prepare vectors in Pinecone format: {"id": str, "values": List[float], "metadata": dict}
+        # This format allows Pinecone to index vectors and filter by metadata
         pinecone_vectors = [
             {
                 "id": ids[i],
-                "values": vectors[i],
-                "metadata": metadata[i]
+                "values": vectors[i],  # 1536-dimensional embedding from OpenAI
+                "metadata": metadata[i]  # Includes filename, page_number, chunk_index, text
             }
             for i in range(len(vectors))
         ]
 
-        # Upsert to Pinecone
+        # Upsert to Pinecone (update if ID exists, insert if new)
         upsert_response = self.index.upsert(
             vectors=pinecone_vectors,
             namespace=namespace

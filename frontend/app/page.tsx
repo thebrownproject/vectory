@@ -6,6 +6,9 @@ import StatusDisplay, { UploadStatus } from "@/components/StatusDisplay";
 import { uploadPDFs } from "@/lib/api";
 
 export default function Home() {
+  // State management using controlled component pattern
+  // files: Managed here (single source of truth), passed down to FileUpload
+  // uploadStatus: Discriminated union prevents impossible states (e.g., error + success simultaneously)
   const [files, setFiles] = useState<File[]>([]);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     state: "idle",
@@ -24,6 +27,7 @@ export default function Home() {
         results,
       });
 
+      // Clear files after successful upload (ready for next batch)
       setFiles([]);
     } catch (error) {
       setUploadStatus({
@@ -49,6 +53,7 @@ export default function Home() {
 
         {/* Main content */}
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+          {/* Controlled component: parent manages files state, child receives props */}
           <FileUpload
             files={files}
             onFilesChange={setFiles}
