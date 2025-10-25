@@ -4,34 +4,66 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Vectory is a lightweight PDF-to-vector ingestion pipeline. It accepts PDF uploads, processes them into chunks, generates embeddings via OpenAI, and stores vectors in Pinecone. This is a proof-of-concept focused on simplicity - not a production application.
+Vectory v2.0 is a multi-user SaaS platform for document knowledge management. Users upload documents (PDF, DOCX, TXT), organize them into "stacks", and search or chat with their content using AI-powered semantic search and RAG.
 
-**Query interface**: Vectors are queried separately via Claude Desktop MCP (not part of this codebase).
+**Current Status**: v1.0 complete (simple POC). Now building v2.0 (production SaaS platform).
+
+**Portfolio Focus**: v2.0 is designed as a portfolio piece to demonstrate full-stack SaaS development, modern UI design (iOS 26 Liquid Glass), and AI integration skills. Potential for real users/revenue in v3.0.
+
+**Key Features**:
+- Multi-user authentication (Supabase Auth)
+- Stack-based document organization
+- Multi-format document processing (PDF, DOCX, TXT) with Docling
+- AI-generated document metadata (titles, descriptions)
+- Semantic search across documents
+- Liquid Glass UI design (iOS 26 aesthetic)
+- Freemium tier with optional Pro chat interface
 
 ## Architecture
 
-### Two-Tier Structure
-- **Frontend**: Next.js 15 (App Router) on localhost:3000 - handles file uploads and displays processing status
-- **Backend**: FastAPI on localhost:8000 - handles PDF processing, embeddings, and vector storage
+### Multi-Tier Structure
+- **Frontend**: Next.js 15 (App Router) on localhost:3000 - handles auth, document management, search, chat
+- **Backend**: FastAPI on localhost:8000 - handles document processing, embeddings, vector search
+- **Database**: Supabase (PostgreSQL + Auth + Storage) - user data, document metadata, authentication
+- **Vector DB**: ChromaDB (self-hosted) - document embeddings and semantic search
 
 ### Processing Pipeline
-1. User uploads PDF → Frontend sends to FastAPI `/api/upload`
-2. Backend extracts text (PyPDF2/pdfplumber)
-3. Backend chunks text using LangChain's RecursiveCharacterTextSplitter (1000 chars, 200 overlap)
-4. Backend generates embeddings (OpenAI `text-embedding-3-small`, 1536 dimensions)
-5. Backend upserts to Pinecone with metadata (filename, page number, chunk index, timestamp)
-6. Backend returns stats → Frontend displays confirmation
+1. User uploads document → Frontend sends to Supabase Storage → Gets file URL
+2. Frontend calls `/api/upload` with file URL and stack_id
+3. Backend fetches file from Supabase Storage
+4. **Docling** extracts text and structure (supports PDF, DOCX, TXT)
+5. **OpenAI GPT-4o-mini** generates title and description from content
+6. Backend chunks text using LangChain's RecursiveCharacterTextSplitter (1000 chars, 200 overlap)
+7. Backend generates embeddings (OpenAI `text-embedding-3-small`, 1536 dimensions)
+8. Backend upserts to **ChromaDB** collection for that stack
+9. Backend updates Supabase document record with metadata and status
+10. Frontend displays AI-generated title/description
 
-### Vector DB Adapter Pattern
-The backend uses an adapter pattern to abstract vector database operations:
+### Multi-Tenant Architecture
+- **Row-Level Security (RLS)**: Supabase enforces data isolation at database level
+- **Stack Collections**: Each user stack gets a unique ChromaDB collection (`stack_{stack_id}`)
+- **Freemium Limits**: Backend validates tier limits (1 stack, 5 docs, 50MB for free tier)
 
-- **Base class**: `backend/adapters/base_adapter.py` - defines `upsert()` and `health_check()` interface
-- **Current implementation**: `backend/adapters/pinecone_adapter.py`
-- **Future implementations**: Chroma, Supabase, Weaviate (swap via `VECTOR_DB_PROVIDER` env var)
+### Vector DB Adapter Pattern (Maintained from v1.0)
+The backend continues to use the adapter pattern for vector database abstraction:
+
+- **Base class**: `backend/adapters/base_adapter.py` - defines `upsert()`, `search()`, `health_check()`
+- **v2.0 implementation**: `backend/adapters/chroma_adapter.py`
+- **v1.0 implementation**: `backend/adapters/pinecone_adapter.py` (still available for compatibility)
+- **Future implementations**: Weaviate, Qdrant (swap via `VECTOR_DB_PROVIDER` env var)
 
 This allows switching vector databases with minimal code changes.
 
 ## Development Commands
+
+### ChromaDB (Vector Database)
+```bash
+# Run ChromaDB in Docker (required before starting backend)
+docker run -d -p 8001:8000 --name chromadb -v chromadb_data:/chroma/chroma chromadb/chroma:latest
+
+# Or use Docker Compose (recommended)
+docker-compose up -d chromadb
+```
 
 ### Backend (FastAPI)
 ```bash
@@ -49,134 +81,325 @@ npm install
 npm run dev  # Runs on localhost:3000
 ```
 
+### Full Stack Startup (Recommended)
+```bash
+# Terminal 1: Start ChromaDB
+docker-compose up chromadb
+
+# Terminal 2: Start backend
+cd backend && source venv/bin/activate && uvicorn main:app --reload --port 8000
+
+# Terminal 3: Start frontend
+cd frontend && npm run dev
+```
+
 ## Environment Configuration
 
 ### Backend `.env`
 ```
+# OpenAI (embeddings + metadata generation)
 OPENAI_API_KEY=sk-...
-PINECONE_API_KEY=...
-PINECONE_ENVIRONMENT=us-east-1
-PINECONE_INDEX_NAME=vectory
-VECTOR_DB_PROVIDER=pinecone  # For adapter switching
+
+# Supabase (auth + database + storage)
+SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_KEY=eyJhbG...
+SUPABASE_SERVICE_KEY=eyJhbG...  # For server-side operations
+
+# ChromaDB (vector database)
+CHROMA_HOST=localhost
+CHROMA_PORT=8001
+VECTOR_DB_PROVIDER=chroma  # For adapter switching
+
+# v1.0 Compatibility (if using Pinecone adapter)
+# PINECONE_API_KEY=...
+# PINECONE_INDEX_NAME=vectory
+# VECTOR_DB_PROVIDER=pinecone
 ```
 
 ### Frontend `.env.local`
 ```
+# Backend API
 NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# Supabase (public keys safe for frontend)
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbG...
 ```
 
 ## API Contract
 
-### POST /api/upload
-- **Input**: multipart/form-data with .pdf file(s)
-- **Output**: `{"success": true, "files_processed": 1, "results": [{"filename": "doc.pdf", "chunks_created": 45, "vectors_stored": 45, "namespace": "doc-uuid-12345"}]}`
-- **Errors**: 400 (invalid file), 422 (extraction failure), 503 (API/DB failure)
+### Authentication Endpoints
+- **POST /api/auth/signup** - Create new user account (email + password)
+- **POST /api/auth/login** - Login user (returns JWT)
+- **POST /api/auth/logout** - Logout user
+- **GET /api/auth/user** - Get current user info
 
-### GET /api/health
-- **Output**: `{"status": "ok", "pinecone_connected": true}`
+### Stack Endpoints
+- **GET /api/stacks** - List all user's stacks
+- **POST /api/stacks** - Create new stack (freemium: max 1 for free tier)
+  - Input: `{"name": "My Documents", "description": "..."}`
+  - Output: `{"id": "uuid", "name": "...", "created_at": "..."}`
+- **DELETE /api/stacks/{stack_id}** - Delete stack and all documents
+
+### Document Endpoints
+- **POST /api/upload** - Upload document to stack
+  - Input: `{"file_url": "supabase-storage-url", "stack_id": "uuid"}`
+  - Output: `{"document_id": "uuid", "title": "AI-generated", "description": "AI summary", "status": "processing"}`
+  - Errors: 400 (invalid file), 413 (exceeds 50MB), 403 (freemium limit exceeded), 503 (processing failure)
+
+- **GET /api/stacks/{stack_id}/documents** - List all documents in stack
+- **GET /api/documents/{document_id}** - Get document details + metadata
+- **DELETE /api/documents/{document_id}** - Delete document
+
+### Search Endpoints
+- **POST /api/search** - Semantic search within stack
+  - Input: `{"query": "search text", "stack_id": "uuid", "limit": 10}`
+  - Output: `{"results": [{"text": "...", "document_id": "...", "relevance_score": 0.89}]}`
+
+### Chat Endpoints (Pro Tier - Phase 8)
+- **POST /api/chat** - Chat with documents (RAG)
+  - Input: `{"message": "...", "stack_id": "uuid", "conversation_id": "uuid"}`
+  - Output: `{"response": "AI answer", "sources": [{"document_id": "...", "text": "..."}]}`
+
+### Health Endpoint
+- **GET /api/health** - Check service status
+  - Output: `{"status": "ok", "chroma_connected": true, "supabase_connected": true}`
 
 ## Metadata Schema
-Each vector in Pinecone includes:
+
+### Supabase Documents Table
+Each document record in PostgreSQL includes:
 ```json
 {
+  "id": "uuid",
+  "stack_id": "uuid",
+  "filename": "document.pdf",
+  "file_url": "https://supabase.co/storage/...",
+  "file_size": 2048576,
+  "title": "Q4 Financial Report",  // AI-generated
+  "description": "Summary of quarterly financial performance...",  // AI-generated
+  "status": "completed",  // uploaded, processing, completed, failed
+  "uploaded_at": "2025-10-25T14:30:00Z",
+  "processed_at": "2025-10-25T14:30:27Z"
+}
+```
+
+### ChromaDB Vector Metadata
+Each vector in ChromaDB includes:
+```json
+{
+  "document_id": "uuid",
   "filename": "document.pdf",
   "page_number": 3,
   "chunk_index": 12,
-  "upload_timestamp": "2025-10-05T14:30:00Z",
   "total_chunks": 45,
+  "section": "Introduction",  // from Docling structure
   "text": "original chunk text..."
 }
 ```
 
 ## Code Philosophy
 
-**This is a POC. Prioritize simplicity over enterprise patterns.**
+**v2.0 is portfolio-first. Balance functionality with polish and clarity.**
 
-- Write minimal, readable code with direct implementations
-- Keep functions small and focused
-- Only add dependencies that are truly essential (question every `pip install` / `npm install`)
-- Use LangChain ONLY for text splitting (it's good at this specific task)
-- Avoid over-abstraction, elaborate folder structures, and "just in case" features
-- Goal: Someone should read the entire codebase in 15 minutes and understand it
+### Core Principles
+- **Clean, readable code**: Prioritize clarity over cleverness
+- **Modern patterns**: Use TypeScript discriminated unions, React hooks, proper separation of concerns
+- **Type safety**: Leverage TypeScript and Pydantic for compile-time guarantees
+- **Small functions**: Keep functions under 50 lines, single responsibility
+- **Comment strategically**: Explain "why" for complex decisions, not "what" for obvious code
+- **Test thoughtfully**: Focus on user flows and critical paths, not 100% coverage
 
-**Exception to simplicity**: The vector DB adapter pattern adds intentional abstraction to support future database swaps without refactoring.
+### Portfolio Considerations
+- **Visual polish matters**: Liquid Glass UI demonstrates modern design skills
+- **Demo-ability**: Build features that look impressive in videos/screenshots
+- **Document decisions**: Architecture Decision Records (ADRs) show strategic thinking
+- **Clean git history**: Granular commits demonstrate professional development workflow
+
+### Intentional Complexity
+v2.0 adds complexity where it provides value:
+- **Adapter pattern**: Maintains v1.0 pattern for vector DB abstraction
+- **RLS policies**: Database-level security is worth the learning curve
+- **Liquid Glass**: Complex CSS/animations demonstrate UI engineering skills
+- **Multi-tenancy**: Shows understanding of SaaS architecture patterns
+
+### Avoid
+- Over-engineering with unnecessary microservices or complex state management
+- Premature optimization (profile first, optimize later)
+- "Just in case" features not in the PRD
+- Adding libraries for trivial tasks native code can handle
 
 ## Task Tracking
 
-**Always check `tasks.md` when starting work.** It contains the complete development roadmap broken into phases. Mark tasks complete with `[x]` as you finish them.
+**Always check `docs/v2.0/tasks-v2.0.md` when starting work.** It contains the complete v2.0 development roadmap broken into 10 phases over 12 weeks. Mark tasks complete with `[x]` as you finish them.
 
-**Always check `development-notes.md` for session context.** This file contains:
-- Important decisions made in previous sessions
-- Package choices and version rationale
-- Current development environment state
-- Blockers, issues, and TODOs
-- Session-to-session continuity notes
+**Reference documentation in `docs/v2.0/`:**
+- `tasks-v2.0.md` - Complete task breakdown with acceptance criteria
+- `ARCHITECTURE-v2.0.md` - Architecture Decision Records (ADRs) and design rationale
+- `prd-v2.0.md` - Product requirements and user stories
+- `frontend-design-guide-v2.0.md` - Liquid Glass design system and UI patterns
 
-Current development follows this sequence:
-1. Setup & Configuration
-2. Vector DB Adapter (abstraction layer)
-3. PDF Processing (extraction + chunking)
-4. Embeddings (OpenAI integration)
-5. Upload Endpoint (full pipeline)
-6. Frontend Upload Interface
-7. Error Handling & Feedback
-8. Testing & Validation
-9. Documentation
+**v1.0 reference materials in `docs/v1.0/`:**
+- Available for reference but v1.0 is complete
+- Adapter pattern from v1.0 is maintained in v2.0
+
+**v2.0 development sequence (12 weeks):**
+1. **Foundation & Supabase Setup** (Weeks 1-2) - Auth, database, RLS
+2. **Multi-User Architecture** (Weeks 2-3) - Stacks, freemium limits
+3. **ChromaDB Integration** (Weeks 3-4) - Vector storage, collections
+4. **Docling Integration** (Weeks 4-5) - Multi-format processing, AI metadata
+5. **Document Management UI** (Weeks 5-6) - Upload, list, detail views
+6. **Search Interface** (Weeks 6-7) - Semantic search UI and backend
+7. **Liquid Glass UI Polish** (Weeks 7-9) - Design system, animations, responsive
+8. **Chat Interface [Optional]** (Weeks 9-10) - RAG with ChatKit (Pro tier)
+9. **Testing & Validation** (Week 10) - E2E, multi-user, performance
+10. **Documentation & Deployment** (Weeks 11-12) - README, deploy, demo
 
 ## Key Constraints
 
-- **Local development only** - no deployment infrastructure
-- **Support PDFs up to 50MB**
-- **Processing target: <30 seconds** per typical PDF
-- **Text extraction accuracy: >95%** for digital PDFs (no OCR support)
-- **OpenAI embedding model**: `text-embedding-3-small` (1536 dimensions)
-- **Chunking parameters**: 1000 characters, 200 character overlap
+### Performance Targets
+- **Document processing**: <30 seconds from upload to searchable (typical document)
+- **Search response time**: <1 second for semantic search queries (95th percentile)
+- **UI performance**: 60fps for Liquid Glass animations on modern devices
 
-## Out of Scope
+### File Support
+- **Formats**: PDF, DOCX, TXT only
+- **File size limit**: 50MB per file
+- **No OCR**: Scanned/image-based PDFs will have poor extraction quality
 
-- Authentication/user accounts
-- Query interface (handled by Claude Desktop MCP)
-- Chat history
-- Document management (delete, update operations)
-- OCR for scanned PDFs
-- Deployment configuration
+### Freemium Limits (Enforced server-side)
+- **Free Tier**: 1 stack, 5 documents per stack, 50MB total storage, no chat
+- **Pro Tier**: Unlimited stacks/documents, chat interface (payment in v3.0)
+
+### Infrastructure
+- **Development**: Local (Docker Compose for ChromaDB)
+- **Production**: Railway/Fly.io + Supabase Cloud (deployment in Phase 10)
+- **ChromaDB**: Self-hosted (not managed service)
+
+### AI Models
+- **Embeddings**: OpenAI `text-embedding-3-small` (1536 dimensions)
+- **Metadata generation**: OpenAI `gpt-4o-mini`
+- **Chat (Pro tier)**: OpenAI `gpt-4o` or `gpt-4o-mini`
+
+## In Scope (v2.0)
+
+✅ Multi-user authentication (Supabase Auth)
+✅ Stack-based document organization
+✅ Multi-format document processing (PDF, DOCX, TXT via Docling)
+✅ AI-generated metadata (titles, descriptions)
+✅ Semantic search across documents
+✅ Liquid Glass UI design (iOS 26 aesthetic)
+✅ Freemium tier enforcement
+✅ Deployment (Railway/Fly.io)
+✅ Chat interface with RAG (Pro tier - Phase 8, optional)
+
+## Out of Scope (Deferred to v3.0)
+
+❌ Payment processing (Stripe integration)
+❌ Collaborative stacks (team sharing)
+❌ Document versioning
+❌ Advanced analytics/dashboards
+❌ OCR for scanned documents
+❌ MCP server for developer access (mentioned in PRD but deferred)
+❌ Custom embedding models (local models)
+❌ Batch document upload
+❌ Public API for integrations
 
 ## Git Workflow
 
 **Repository**: https://github.com/thebrownproject/vectory
 
-**Branching Strategy**: Branch per development phase
+**Branch Structure**:
+- `main` - v1.0 stable release (complete, functional POC)
+- `v2.0-dev` - v2.0 development branch (created from main)
+- Feature branches off `v2.0-dev` for major phases (optional)
 
-Create feature branches for each phase in `tasks.md`:
-- `feature/phase-1-setup`
-- `feature/phase-2-vector-adapter`
-- `feature/phase-3-pdf-processing`
-- `feature/phase-4-embeddings`
-- `feature/phase-5-upload-endpoint`
-- `feature/phase-6-frontend`
-- `feature/phase-7-error-handling`
-- `feature/phase-8-testing`
-- `feature/phase-9-documentation`
+**Branching Strategy for v2.0**:
 
-**Workflow**:
-1. Check `tasks.md` to identify current phase
-2. Create branch: `git checkout -b feature/phase-X-name`
-3. Complete a single task (e.g., T1.1)
-4. Commit immediately: `git add . && git commit -m "Complete T1.1: [description]"`
-5. Move to next task in the phase
-6. Repeat steps 3-5 until all tasks in phase are complete
-7. Test the entire phase functionality
-8. Push branch: `git push -u origin feature/phase-X-name`
-9. Merge to `main`: `git checkout main && git merge feature/phase-X-name`
-10. Push: `git push origin main`
-11. Move to next phase
+### Option 1: Single v2.0-dev Branch (Recommended for solo development)
+```bash
+git checkout main
+git checkout -b v2.0-dev
+# Work directly on v2.0-dev, committing after each task
+# Merge to main when v2.0 is complete and tested
+```
 
-**Important**: Commit after EACH task completion, not at the end of the phase. This creates granular history and easy rollback points.
+### Option 2: Phase-Based Feature Branches (For larger phases)
+```bash
+git checkout v2.0-dev
+git checkout -b feature/v2-phase-1-foundation
+# Complete Phase 1 tasks
+# Merge back to v2.0-dev when phase complete
+```
+
+**Development Workflow**:
+1. Check `docs/v2.0/tasks-v2.0.md` to identify current task
+2. Complete a single task (e.g., T1.1)
+3. Test task completion
+4. Commit immediately with task reference:
+   ```bash
+   git add .
+   git commit -m "Complete T1.1: Set up Supabase project
+
+   - Created Supabase project in cloud dashboard
+   - Configured project settings and region
+   - Added environment variables to .env
+   - Tested connection from local development"
+   ```
+5. Move to next task
+6. Repeat steps 2-5 until phase complete
+7. Push regularly: `git push origin v2.0-dev`
+
+**Important Practices**:
+- ✅ Commit after EACH task completion (granular history)
+- ✅ Include task ID in commit message (e.g., "Complete T1.1:")
+- ✅ Test before committing
+- ✅ Push at end of each development session
+- ✅ Write descriptive commit messages (explain what AND why)
+- ❌ Don't batch multiple tasks into one commit
+- ❌ Don't commit broken code
 
 **Commit Message Format**:
 ```
-Brief description of changes
+Complete T[X.Y]: [Brief description in imperative mood]
 
-- Bullet point details of what changed
-- Reference task IDs when applicable (e.g., "Completed T1.1-T1.5")
+- Bullet point: specific change made
+- Bullet point: another change made
+- Reference related tasks if applicable (e.g., "Part of Phase 1 foundation")
+```
+
+**Example Good Commits**:
+```
+Complete T1.3: Create database schema in Supabase
+
+- Created profiles, stacks, documents tables
+- Added foreign key relationships
+- Set up proper indexes for query performance
+- Documented schema in ARCHITECTURE-v2.0.md
+```
+
+```
+Complete T7.2: Build Liquid Glass top bar component
+
+- Created TopBar.tsx with glassmorphic styling
+- Implemented scroll-based height/opacity changes
+- Added Framer Motion animations for smooth transitions
+- Tested responsive behavior on mobile/desktop
+```
+
+**Merging v2.0 to Main**:
+When v2.0 is complete, tested, and ready for release:
+```bash
+git checkout main
+git merge v2.0-dev --no-ff  # Creates merge commit for clear history
+git tag v2.0.0
+git push origin main --tags
+```
+
+**Keeping v1.0 Accessible**:
+v1.0 remains on `main` branch history. Create tag for reference:
+```bash
+git checkout main
+git tag v1.0.0 [commit-hash-of-last-v1-commit]
+git push origin v1.0.0
 ```
