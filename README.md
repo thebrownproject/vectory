@@ -1,256 +1,90 @@
 # Vectory
 
-> A lightweight PDF-to-vector ingestion pipeline for building searchable document knowledge bases
+![Status](https://img.shields.io/badge/status-complete-green)
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
+![Pinecone](https://img.shields.io/badge/Pinecone-000000?logo=pinecone&logoColor=white)
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.118-009688)](https://fastapi.tiangolo.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB)](https://www.python.org/)
+> RAG document processing pipeline for chunking and vectorizing documents with drag-and-drop upload interface
+
+🔗 **Live Demo:** *Coming soon*
+
+---
 
 ## Overview
 
-Vectory is a full-stack web application that transforms PDF documents into searchable vector embeddings. Upload PDFs through a clean drag-and-drop interface, and Vectory automatically extracts text, chunks content intelligently, generates embeddings via OpenAI, and stores vectors in Pinecone for semantic search.
+Vectory is a full-stack document ingestion pipeline that transforms PDFs into searchable vector embeddings for RAG (Retrieval-Augmented Generation) applications. Users upload documents via a drag-and-drop interface, and the system automatically extracts text, intelligently chunks content, generates embeddings via OpenAI, and stores vectors in Pinecone. Built as an exploration of RAG architecture patterns and vector database integration, demonstrating adapter pattern implementation for database portability across Pinecone, Chroma, Supabase, and Weaviate.
 
-This is a proof-of-concept demonstrating modern document ingestion architecture with an adapter pattern for vector database portability.
-
-## Features
-
-- **Drag-and-drop PDF upload** with real-time processing feedback
-- **Intelligent text chunking** (1000 chars, 200 char overlap) using LangChain
-- **OpenAI embeddings** via `text-embedding-3-small` (1536 dimensions)
-- **Vector database adapter pattern** for easy swapping between Pinecone, Chroma, Supabase, or Weaviate
-- **Rich metadata tracking** (filename, page number, chunk index, timestamp)
-- **Comprehensive error handling** with user-friendly messages
-- **Clean architecture** with service layer separation and type-safe TypeScript
-
-## Architecture
-
-```
-┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────┐
-│   Next.js   │─────▶│   FastAPI    │─────▶│   OpenAI    │      │ Pinecone │
-│   Frontend  │      │   Backend    │      │  Embeddings │      │  Vectors │
-│ (localhost  │◀─────│ (localhost   │      └─────────────┘      └──────────┘
-│    :3000)   │      │    :8000)    │              │                   ▲
-└─────────────┘      └──────────────┘              │                   │
-                             │                     └───────────────────┘
-                             ▼                       Vector Upsert
-                     ┌──────────────┐
-                     │ PDF Processor│
-                     │  (pypdf +    │
-                     │  LangChain)  │
-                     └──────────────┘
-```
+---
 
 ## Tech Stack
 
-### Frontend
-- **Next.js 15** (App Router) - React framework with server components
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling
-- **react-dropzone** - File upload handling
-- **Lucide React** - Icon library
+**Frontend:** Next.js 15 · TypeScript · TailwindCSS · react-dropzone
+**Backend:** FastAPI · Python 3.11
+**AI/ML:** LangChain · OpenAI API (text-embedding-3-small) · Pinecone
+**Architecture:** Adapter Pattern · Service Layer · RESTful API
 
-### Backend
-- **FastAPI** - High-performance Python web framework
-- **pypdf** - PDF text extraction
-- **LangChain** - Text splitting utilities
-- **OpenAI Python SDK** - Embedding generation
-- **Pinecone** - Vector database storage
+---
 
-## Getting Started
+## Features
 
-### Prerequisites
+- Drag-and-drop PDF upload interface with real-time processing feedback
+- Intelligent text chunking using LangChain RecursiveCharacterTextSplitter (1000 chars, 200 overlap)
+- OpenAI embedding generation with text-embedding-3-small model (1536 dimensions)
+- Adapter pattern for vector database portability enabling provider switching via environment variable
+- Namespace isolation strategy using filename-uuid format for document versioning
+- Rich metadata tracking including filename, page number, chunk index, and timestamp
+- Type-safe state management using TypeScript discriminated unions
+- Clean architecture with service layer separation and abstract base class interfaces
 
-- **Node.js** 18+ and npm
-- **Python** 3.11+
-- **OpenAI API key** ([Get one here](https://platform.openai.com/api-keys))
-- **Pinecone account** ([Sign up free](https://www.pinecone.io/))
-  - Create an index named `vectory` with 1536 dimensions (cosine metric)
+---
 
-### Installation
+## Architecture & Tech Decisions
 
-**1. Clone the repository**
+Built with FastAPI and Next.js to demonstrate modern full-stack architecture for AI document processing. Implemented adapter pattern with abstract base class `VectorDBAdapter` defining `upsert()` and `health_check()` methods, allowing vector database swapping without refactoring application code. Chose LangChain for text splitting due to its intelligent chunking algorithms optimized for semantic coherence. Used TypeScript discriminated unions for upload state management to enforce type-safe state transitions and prevent impossible states at compile time. Namespace strategy generates unique identifiers per upload session (`filename-uuid`) enabling document re-uploads and isolated querying. Service layer pattern separates API communication logic from React components for testability and reusability.
+
+---
+
+## Learnings & Challenges
+
+**Key Learnings:**
+- Implementing RAG document ingestion pipeline with LangChain text splitting and OpenAI embeddings
+- Designing adapter pattern with Python abstract base classes for database-agnostic architecture
+- Using TypeScript discriminated unions for exhaustive type checking and impossible state prevention
+- Building clean API architecture with FastAPI including CORS configuration and error handling
+
+**Challenges Overcome:**
+- Designing adapter interface that balances simplicity with extensibility for multiple vector DB providers
+- Implementing controlled component pattern in React to maintain single source of truth for file state
+- Choosing optimal chunking parameters (1000 chars, 200 overlap) balancing semantic coherence with embedding costs
+- Structuring metadata schema to support future query requirements without over-engineering
+
+---
+
+## Quick Start
 
 ```bash
-git clone https://github.com/thebrownproject/vectory.git
-cd vectory
-```
-
-**2. Backend setup**
-
-```bash
+# Backend setup
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
-```
+uvicorn main:app --reload --port 8000
 
-**3. Frontend setup**
-
-```bash
-cd ../frontend
+# Frontend setup (separate terminal)
+cd frontend
 npm install
+npm run dev
+# Requires .env with OPENAI_API_KEY and PINECONE_API_KEY
 ```
 
-### Configuration
-
-**Backend environment variables** (`backend/.env`):
-
-```bash
-# Copy the example file
-cp .env.example .env
-
-# Edit .env with your credentials
-OPENAI_API_KEY=sk-...
-PINECONE_API_KEY=...
+Create `backend/.env`:
+```
+OPENAI_API_KEY=sk-your-key-here
+PINECONE_API_KEY=your-pinecone-key
 PINECONE_ENVIRONMENT=us-east-1
 PINECONE_INDEX_NAME=vectory
 VECTOR_DB_PROVIDER=pinecone
 ```
-
-**Frontend environment variables** (`frontend/.env.local`):
-
-```bash
-# Copy the example file
-cp .env.local.example .env.local
-
-# Default value (no changes needed for local dev)
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-## Usage
-
-**Start the backend** (from `backend/` directory):
-
-```bash
-source venv/bin/activate
-uvicorn main:app --reload --port 8000
-```
-
-Backend will be available at `http://localhost:8000`
-API documentation at `http://localhost:8000/docs`
-
-**Start the frontend** (from `frontend/` directory):
-
-```bash
-npm run dev
-```
-
-Frontend will be available at `http://localhost:3000`
-
-**Upload a PDF:**
-
-1. Navigate to `http://localhost:3000`
-2. Drag and drop a PDF file (or click to browse)
-3. Click "Upload"
-4. View processing results (chunks created, vectors stored, namespace)
-5. Query vectors separately via Claude Desktop MCP or Pinecone console
-
-## Project Structure
-
-```
-vectory/
-├── frontend/                  # Next.js application
-│   ├── app/
-│   │   └── page.tsx          # Main upload interface
-│   ├── components/
-│   │   ├── FileUpload.tsx    # Drag-drop component
-│   │   └── StatusDisplay.tsx # Processing feedback
-│   └── lib/
-│       └── api.ts            # API service layer
-│
-├── backend/                   # FastAPI application
-│   ├── main.py               # App entry point
-│   ├── routers/
-│   │   └── upload.py         # Upload endpoint
-│   ├── services/
-│   │   ├── pdf_processor.py  # PDF extraction & chunking
-│   │   └── embeddings.py     # OpenAI embedding generation
-│   ├── adapters/
-│   │   ├── base_adapter.py   # Abstract vector DB interface
-│   │   └── pinecone_adapter.py # Pinecone implementation
-│   └── tests/                # Test scripts
-│
-├── tasks.md                  # Development roadmap
-├── prd.md                    # Product requirements
-└── README.md
-```
-
-## API Endpoints
-
-### `POST /api/upload`
-
-Upload and process PDF files into vector embeddings.
-
-**Request:** `multipart/form-data` with PDF file(s)
-
-**Response:**
-```json
-{
-  "success": true,
-  "files_processed": 1,
-  "results": [
-    {
-      "filename": "document.pdf",
-      "chunks_created": 45,
-      "vectors_stored": 45,
-      "namespace": "document.pdf-a1b2c3d4"
-    }
-  ]
-}
-```
-
-**Error codes:**
-- `400` - Invalid file type (non-PDF)
-- `422` - PDF extraction failure (corrupted file or no text)
-- `503` - Service failure (OpenAI API or Pinecone error)
-
-### `GET /api/health`
-
-Check backend and Pinecone connection status.
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "pinecone_connected": true
-}
-```
-
-## Vector Database Adapter Pattern
-
-Vectory uses an adapter pattern to abstract vector database operations, making it easy to swap providers without refactoring application code.
-
-**Current implementation:** Pinecone
-**Planned support:** Chroma, Supabase Vector, Weaviate
-
-To switch providers, simply:
-1. Implement the `VectorDBAdapter` interface in `adapters/`
-2. Update `VECTOR_DB_PROVIDER` in `.env`
-
-## Development Notes
-
-- **Text chunking:** 1000 characters with 200 character overlap via LangChain's RecursiveCharacterTextSplitter
-- **Embedding model:** OpenAI `text-embedding-3-small` (1536 dimensions)
-- **Namespace format:** `{filename}-{uuid}` to support re-uploading the same file
-- **Metadata schema:** Includes filename, page number, chunk index, timestamp, and original text
-
-## Future Enhancements
-
-- Multi-tenant architecture with user authentication
-- Support for Word docs, Excel, and images (OCR)
-- Direct integrations with Notion, Google Drive, Confluence
-- Usage analytics and cost tracking
-- Query interface (currently handled separately via Claude Desktop MCP)
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Author
-
-Built by [Fraser Brown](https://github.com/thebrownproject) as a portfolio project demonstrating full-stack development, clean architecture, and modern AI integration patterns.
-
----
-
-**⭐ If you found this project useful, please consider starring it on GitHub!**
